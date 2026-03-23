@@ -1,0 +1,5 @@
+{
+  "name": "NutriVision AI",
+  "description": "AI-powered nutrition and fitness tracker with image scanning and personalized coaching.",
+  "requestFramePermissions": ["camera", "geolocation"]
+}

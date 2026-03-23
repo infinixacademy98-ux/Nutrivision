@@ -1,0 +1,161 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores user physical data and nutrition goals.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "age": { "type": "number" },
+        "gender": { "type": "string", "enum": ["male", "female", "other"] },
+        "height": { "type": "number", "description": "Height in cm" },
+        "weight": { "type": "number", "description": "Weight in kg" },
+        "activityLevel": { "type": "string", "enum": ["sedentary", "moderate", "active"] },
+        "goal": { "type": "string", "enum": ["weight_loss", "maintenance", "weight_gain"] },
+        "dailyCalorieGoal": { "type": "number" },
+        "macroGoals": {
+          "type": "object",
+          "properties": {
+            "protein": { "type": "number" },
+            "fat": { "type": "number" },
+            "carbs": { "type": "number" },
+            "fiber": { "type": "number" }
+          }
+        },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "bmi": { "type": "number" },
+        "aiUsage": {
+          "type": "object",
+          "properties": {
+            "count": { "type": "number" },
+            "lastResetDate": { "type": "string" }
+          }
+        }
+      },
+      "required": ["uid", "name", "age", "gender", "height", "weight", "activityLevel", "goal"]
+    },
+    "FoodLog": {
+      "title": "Food Log",
+      "description": "Daily food intake entries.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "calories": { "type": "number" },
+        "protein": { "type": "number" },
+        "fat": { "type": "number" },
+        "carbs": { "type": "number" },
+        "fiber": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "portionSize": { "type": "string" }
+      },
+      "required": ["uid", "name", "calories", "timestamp"]
+    },
+    "WeightEntry": {
+      "title": "Weight Entry",
+      "description": "Historical weight tracking.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "weight": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "weight", "timestamp"]
+    },
+    "ActivityLog": {
+      "title": "Activity Log",
+      "description": "Exercise and activity entries.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "caloriesBurned": { "type": "number" },
+        "duration": { "type": "number", "description": "Duration in minutes" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "name", "caloriesBurned", "timestamp"]
+    },
+    "Workout": {
+      "title": "Workout",
+      "description": "GPS-tracked running or walking workout.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "type": { "type": "string", "enum": ["run", "walk"] },
+        "distance": { "type": "number", "description": "Distance in km" },
+        "duration": { "type": "number", "description": "Duration in seconds" },
+        "calories": { "type": "number" },
+        "pace": { "type": "number", "description": "Pace in min/km" },
+        "route": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "lat": { "type": "number" },
+              "lng": { "type": "number" }
+            }
+          }
+        },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "type", "distance", "duration", "calories", "timestamp"]
+    },
+    "UserAchievement": {
+      "title": "User Achievement",
+      "description": "A fitness or nutrition milestone unlocked by the user.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "achievementId": { "type": "string" },
+        "unlockedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "achievementId", "unlockedAt"]
+    },
+    "SmartWatchLog": {
+      "title": "Smart Watch Log",
+      "description": "Fitness data imported from a smart watch.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "steps": { "type": "number" },
+        "distance": { "type": "number", "description": "Distance in km" },
+        "caloriesBurned": { "type": "number" },
+        "averageHeartRate": { "type": "number" },
+        "activeMinutes": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "caloriesBurned", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile document."
+    },
+    "/users/{userId}/foodLogs/{logId}": {
+      "schema": "FoodLog",
+      "description": "User's daily food logs."
+    },
+    "/users/{userId}/weightHistory/{entryId}": {
+      "schema": "WeightEntry",
+      "description": "User's weight history."
+    },
+    "/users/{userId}/activityLogs/{logId}": {
+      "schema": "ActivityLog",
+      "description": "User's activity logs."
+    },
+    "/users/{userId}/workouts/{workoutId}": {
+      "schema": "Workout",
+      "description": "User's GPS-tracked workouts."
+    },
+    "/users/{userId}/achievements/{achievementId}": {
+      "schema": "UserAchievement",
+      "description": "User's unlocked achievements."
+    },
+    "/users/{userId}/smartWatchLogs/{logId}": {
+      "schema": "SmartWatchLog",
+      "description": "User's smart watch fitness logs."
+    }
+  }
+}

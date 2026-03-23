@@ -1,0 +1,21 @@
+{
+  "name": "NutriVision AI",
+  "short_name": "NutriVision",
+  "description": "AI-powered nutrition and fitness tracker.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FF6321",
+  "theme_color": "#FF6321",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/x8dG9764/Nutri-Vision-AI-logo-design.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://i.ibb.co/x8dG9764/Nutri-Vision-AI-logo-design.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

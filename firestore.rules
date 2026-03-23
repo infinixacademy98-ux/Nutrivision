@@ -1,0 +1,163 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: /users/{userId}
+    // Fields: uid, name, age, gender, height, weight, activityLevel, goal, dailyCalorieGoal, macroGoals
+    //
+    // Collection: /users/{userId}/foodLogs/{logId}
+    // Fields: uid, name, calories, protein, fat, carbs, fiber, timestamp, portionSize
+    //
+    // Collection: /users/{userId}/weightHistory/{entryId}
+    // Fields: uid, weight, timestamp
+    //
+    // Collection: /users/{userId}/activityLogs/{logId}
+    // Fields: uid, name, caloriesBurned, duration, timestamp
+    //
+    // Collection: /users/{userId}/workouts/{workoutId}
+    // Fields: uid, type, distance, duration, calories, pace, route, timestamp
+    //
+    // Collection: /users/{userId}/smartWatchLogs/{logId}
+    // Fields: uid, steps, distance, caloriesBurned, heartRate, activeMinutes, timestamp
+    //
+    // Collection: /users/{userId}/achievements/{achievementId}
+    // Fields: uid, achievementId, unlockedAt
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    function isAdmin() {
+      return isAuthenticated() &&
+        (request.auth.token.email == "infinixacademy98@gmail.com" && request.auth.token.email_verified == true);
+    }
+    function uidUnchanged() {
+      return !('uid' in request.resource.data) ||
+        request.resource.data.uid == request.auth.uid;
+    }
+    function uidNotModified() {
+      return !('uid' in request.resource.data) ||
+        request.resource.data.uid == resource.data.uid;
+    }
+
+    function isValidUser(data) {
+      let allowed = ['uid', 'name', 'age', 'gender', 'height', 'weight', 'activityLevel', 'goal', 'dailyCalorieGoal', 'macroGoals', 'role', 'bmi', 'aiUsage'];
+      return data.keys().hasAll(['uid', 'name', 'age', 'gender', 'height', 'weight', 'activityLevel', 'goal']) &&
+             data.keys().hasOnly(allowed) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.age is number && data.age > 0 && data.age < 150 &&
+             data.height is number && data.height > 0 && data.height < 300 &&
+             data.weight is number && data.weight > 0 && data.weight < 1000;
+    }
+    function isValidFoodLog(data) {
+      let allowed = ['uid', 'name', 'calories', 'protein', 'fat', 'carbs', 'fiber', 'timestamp', 'portionSize'];
+      return data.keys().hasAll(['uid', 'name', 'calories', 'timestamp']) &&
+             data.keys().hasOnly(allowed) &&
+             data.uid == request.auth.uid &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 200 &&
+             data.calories is number && data.calories >= 0 &&
+             data.timestamp is string && data.timestamp.size() < 50;
+    }
+    function isValidWeightEntry(data) {
+      let allowed = ['uid', 'weight', 'timestamp'];
+      return data.keys().hasAll(['uid', 'weight', 'timestamp']) &&
+             data.keys().hasOnly(allowed) &&
+             data.uid == request.auth.uid &&
+             data.weight is number && data.weight > 0 &&
+             data.timestamp is string && data.timestamp.size() < 50;
+    }
+    function isValidActivityLog(data) {
+      let allowed = ['uid', 'name', 'caloriesBurned', 'duration', 'timestamp'];
+      return data.keys().hasAll(['uid', 'name', 'caloriesBurned', 'timestamp']) &&
+             data.keys().hasOnly(allowed) &&
+             data.uid == request.auth.uid &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 200 &&
+             data.caloriesBurned is number && data.caloriesBurned >= 0 &&
+             data.timestamp is string && data.timestamp.size() < 50;
+    }
+    function isValidWorkout(data) {
+      let allowed = ['uid', 'type', 'distance', 'duration', 'calories', 'pace', 'route', 'timestamp'];
+      return data.keys().hasAll(['uid', 'type', 'distance', 'duration', 'calories', 'timestamp']) &&
+             data.keys().hasOnly(allowed) &&
+             data.uid == request.auth.uid &&
+             data.type in ['run', 'walk'] &&
+             data.distance is number && data.distance >= 0 &&
+             data.duration is number && data.duration >= 0 &&
+             data.calories is number && data.calories >= 0 &&
+             data.timestamp is string && data.timestamp.size() < 50;
+    }
+    function isValidSmartWatchLog(data) {
+      let allowed = ['uid', 'steps', 'distance', 'caloriesBurned', 'averageHeartRate', 'activeMinutes', 'timestamp'];
+      return data.keys().hasAll(['uid', 'caloriesBurned', 'timestamp']) &&
+             data.keys().hasOnly(allowed) &&
+             data.uid == request.auth.uid &&
+             data.caloriesBurned is number && data.caloriesBurned >= 0 &&
+             data.timestamp is string && data.timestamp.size() < 50;
+    }
+    function isValidAchievement(data) {
+      let allowed = ['uid', 'achievementId', 'unlockedAt'];
+      return data.keys().hasAll(['uid', 'achievementId', 'unlockedAt']) &&
+             data.keys().hasOnly(allowed) &&
+             data.uid == request.auth.uid &&
+             data.achievementId is string && data.achievementId.size() < 100 &&
+             data.unlockedAt is string && data.unlockedAt.size() < 50;
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && uidUnchanged() && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && uidNotModified() && isValidUser(request.resource.data);
+      
+      match /foodLogs/{logId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && uidUnchanged() && isValidFoodLog(request.resource.data);
+        allow update: if isOwner(userId) && uidNotModified() && isValidFoodLog(request.resource.data);
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+      
+      match /weightHistory/{entryId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && uidUnchanged() && isValidWeightEntry(request.resource.data);
+        allow update: if isOwner(userId) && uidNotModified() && isValidWeightEntry(request.resource.data);
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+
+      match /activityLogs/{logId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && uidUnchanged() && isValidActivityLog(request.resource.data);
+        allow update: if isOwner(userId) && uidNotModified() && isValidActivityLog(request.resource.data);
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+
+      match /workouts/{workoutId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && uidUnchanged() && isValidWorkout(request.resource.data);
+        allow update: if isOwner(userId) && uidNotModified() && isValidWorkout(request.resource.data);
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+
+      match /smartWatchLogs/{logId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && uidUnchanged() && isValidSmartWatchLog(request.resource.data);
+        allow update: if isOwner(userId) && uidNotModified() && isValidSmartWatchLog(request.resource.data);
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+
+      match /achievements/{achievementId} {
+        allow read: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && uidUnchanged() && isValidAchievement(request.resource.data);
+        allow update: if isOwner(userId) && uidNotModified() && isValidAchievement(request.resource.data);
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+    }
+  }
+}
+
