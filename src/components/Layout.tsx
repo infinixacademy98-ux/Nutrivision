@@ -64,6 +64,9 @@ export default function Layout({ children, activeTab, setActiveTab, onCalendarCl
         >
           {children}
         </motion.div>
+        <footer className="mt-12 mb-8 text-center">
+          <p className="text-stone-400 text-xs font-medium tracking-wider uppercase">Created by Infinix Academy</p>
+        </footer>
       </main>
 
       <nav className="fixed bottom-6 left-6 right-6 bg-brand-dark rounded-[2.5rem] px-4 py-3 z-50 shadow-2xl shadow-black/20 max-w-md mx-auto">

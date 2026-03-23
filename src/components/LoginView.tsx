@@ -269,6 +269,9 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
             </p>
           )}
         </div>
+        <footer className="mt-12 text-center">
+          <p className="text-white/50 text-xs font-medium tracking-wider uppercase">Created by Infinix Academy</p>
+        </footer>
       </motion.div>
     </div>
   );

@@ -312,6 +312,7 @@ export default function App() {
             referrerPolicy="no-referrer"
           />
           <Loader2 className="w-8 h-8 text-brand-orange animate-spin" />
+          <p className="text-stone-400 text-[10px] font-bold uppercase tracking-[0.2em] mt-8">Created by Infinix Academy</p>
         </motion.div>
       </div>
     );
@@ -330,6 +331,9 @@ export default function App() {
             <p className="text-stone-500">Let's set up your nutrition profile to get started.</p>
           </div>
           <ProfileForm onSubmit={handleSaveProfile} />
+          <footer className="mt-12 mb-8 text-center">
+            <p className="text-stone-400 text-xs font-medium tracking-wider uppercase">Created by Infinix Academy</p>
+          </footer>
         </div>
       </div>
     );
